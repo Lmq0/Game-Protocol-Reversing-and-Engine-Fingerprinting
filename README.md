@@ -97,7 +97,7 @@ This is a journey of peeling back the layers of obfuscation to see the raw, unad
 </div>
 
 <div align="center">
-  <img src="image/hxd_Particle.png" alt="HxD Engine Fingerprint2" width="100%" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <img src="image/hex_Particle.png" alt="HxD Engine Fingerprint2" width="100%" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <br>
   <em>Figure 4: HxD search results showing UE3 class names inside libHOGame.so.</em>
 </div>
