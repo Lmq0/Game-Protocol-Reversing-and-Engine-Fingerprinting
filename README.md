@@ -120,16 +120,14 @@ Before we inspect the game's files, let's establish what a standard, pristine Un
 In a standard UE3 architecture, the engine relies heavily on a fixed binary structure. The first 4 bytes must always be the standard Magic Number (Tag), followed by the engine version, and then a comprehensive "Summary" (directory) that tells the engine where to find the Name Table, Import/Export tables, and the actual Data Payload.
 
 **Standard UE3 Package Structure (Normal State):**
-```text
-+-------------------------------------------------------------+
-| Offset | Hex Bytes     | Field Name          | Description   |
-+--------+---------------+---------------------+---------------+
-| 0x00   | C1 83 2A 9E   | Magic Number (Tag)  | Identifies UE3|
-| 0x04   | C1 0F 00 00   | Engine Version      | e.g., 0x0FC1  |
-| 0x08   | XX XX XX XX   | Header Size         | Size of Summ. |
-| 0x0C   | XX XX XX XX   | Name Table Offset   | Pointer to Names|
-| ...    | ...           | ...                 | ...           |
-+--------+---------------+---------------------+---------------+
+```mermaid
+block-beta
+  columns 3
+  A["Offset: 0x00"] B["C1 83 2A 9E"] C["Magic Number (Tag) - 'ID Card of UE3'"]
+  D["Offset: 0x04"] E["C1 0F 00 00"] F["Engine Version (e.g., 4033)"]
+  G["Offset: 0x08"] H["XX XX XX XX"] I["Header Size (Summary)"]
+  J["Offset: 0x0C"] K["XX XX XX XX"] L["Name Table Offset (Pointer)"]
+  M["..."] N["..."] O["Data Payload / Tables"]
 ```
 
 *(In standard UE3, `C1 83 2A 9E` is the absolute "ID card" of the file. Without it, the engine and any unpacking tool like UModel will immediately reject the file.)*
@@ -149,9 +147,9 @@ By comparing the standard structure with our captured data, we found that the ga
 By scanning the entire directory, we confirmed that the vast majority of the asset files share this custom header. This explained why standard unpacking tools (like UModel) failed, as they were looking for a standard UE3 ID card that the developers had deliberately destroyed.
 
 <div align="center">
-  <img src="image/custom_magic_number.png" alt="Custom Magic Number" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <img src="image/custom_magic_number.png" alt="Custom Magic Number" width="100%" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <br>
-  <em>Figure 4: HxD showing the custom magic number "86 C7 E4 47" at the beginning of the asset files.</em>
+  <em>Figure 5: HxD showing the custom magic number "86 C7 E4 47" at the beginning of the asset files.</em>
 </div>
 
 ### Step 5: Locating the Compressed Chunks & Decompression Attempt
@@ -176,5 +174,5 @@ The game employs a custom **multi-chunk encapsulation** strategy. It strips the 
 <div align="center">
   <img src="image/decoded.png" alt="Zlib Header in Hex" width="100%" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <br>
-  <em>Figure 5: Locating the "78 9C" Zlib header and the secondary custom magic number within the binary stream.</em>
+  <em>Figure 6: Locating the "78 9C" Zlib header and the secondary custom magic number within the binary stream.</em>
 </div>
