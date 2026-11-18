@@ -114,8 +114,67 @@ To answer this, we shift our focus from native binary analysis to the `assets` d
 *   **Action**: Opened several `.ast.png` and `.fst.png` files in the `DataAndroid` directory and inspected the first 4 bytes of their headers.
 *   **Purpose & Finding**: We discovered that all files consistently start with `86 C7 E4 47`. This is **NOT** the standard UE3 magic number (which should be `C1 83 2A 9E`). This is a custom "fake magic number" applied by the game developers. By scanning the directory, we confirmed that the vast majority of the asset files share this custom header to bypass standard unpacking tools.
 
+## What is the Standard file looks like ?
+Before we inspect the game's files, let's establish what a standard, pristine Unreal Engine 3 (UE3) package (`.upk`) should look like at the binary level. 
+
+In a standard UE3 architecture, the engine relies heavily on a fixed binary structure. The first 4 bytes must always be the standard Magic Number (Tag), followed by the engine version, and then a comprehensive "Summary" (directory) that tells the engine where to find the Name Table, Import/Export tables, and the actual Data Payload.
+
+**Standard UE3 Package Structure (Normal State):**
+```text
++-------------------------------------------------------------+
+| Offset | Hex Bytes     | Field Name          | Description   |
++--------+---------------+---------------------+---------------+
+| 0x00   | C1 83 2A 9E   | Magic Number (Tag)  | Identifies UE3|
+| 0x04   | C1 0F 00 00   | Engine Version      | e.g., 0x0FC1  |
+| 0x08   | XX XX XX XX   | Header Size         | Size of Summ. |
+| 0x0C   | XX XX XX XX   | Name Table Offset   | Pointer to Names|
+| ...    | ...           | ...                 | ...           |
++--------+---------------+---------------------+---------------+
+```
+
+*(In standard UE3, `C1 83 2A 9E` is the absolute "ID card" of the file. Without it, the engine and any unpacking tool like UModel will immediately reject the file.)*
+
+However, during our analysis, we captured a completely different scenario:
+
+*   **Tools Used**: HxD / Python Scripts
+*   **Action**: Opened several `.ast.png` and `.fst.png` files in the `assets/DataAndroid` directory and inspected the first 4 bytes of their headers.
+*   **Purpose & Finding**: We discovered that all files consistently start with **`86 C7 E4 47`**. This is **NOT** the standard UE3 magic number.
+
+By comparing the standard structure with our captured data, we found that the game developers had aggressively modified the engine:
+
+*   **Fake Magic Number**: They replaced the standard `C1 83 2A 9E` with a custom tag `86 C7 E4 47`.
+*   **Stripped Summary**: In many of the `.ast.png` files, the standard "Summary" directory was completely removed or obfuscated.
+*   **Camouflaged Extension**: They renamed the `.upk` binaries to `.png` to trick basic asset scanners.
+
+By scanning the entire directory, we confirmed that the vast majority of the asset files share this custom header. This explained why standard unpacking tools (like UModel) failed, as they were looking for a standard UE3 ID card that the developers had deliberately destroyed.
+
 <div align="center">
   <img src="image/hxd_magic_number.png" alt="Custom Magic Number" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <br>
   <em>Figure 4: HxD showing the custom magic number "86 C7 E4 47" at the beginning of the asset files.</em>
+</div>
+
+### Step 5: Locating the Compressed Chunks & Decompression Attempt
+
+Once we discovered the custom magic number (`86 C7 E4 47`), our next challenge was to extract the actual data. Since standard unpacking tools failed, we needed to manually trace how the engine processes the binary stream.
+
+*   **Tools Used**: HxD / Python (`zlib` module)
+*   **Action**: We manually dissected the file structure and used Python scripts to search for standard compression signatures across the binary data.
+
+**Key Findings & Analysis:**
+
+1.  **Locating the Zlib Header**: We scanned the `.ast.png` and `.fst.png` files for the standard Zlib header signature **`78 9C`**. Finding this confirmed that the raw data was compressed using the DEFLATE algorithm, but hidden deep inside the file rather than using standard UE3 compression wrappers.
+2.  **Multi-Chunk Concatenation**: While inspecting the hex dump, we discovered that a single file contained multiple instances of the custom magic number `86 C7 E4 47`. For example, a file might start with the custom header, contain some uncompressed structural data (like the string `"None"`), and then suddenly begin a new block with `86 C7 E4 47` followed immediately by `78 9C` compressed data. 
+3.  **The Offset Trap**: This multi-chunk structure explained why standard tools crashed. They expected a single, monolithic UE3 package, but instead, they encountered disjointed blocks of data. When UModel attempted to parse the file, it misread the offsets (e.g., the `pos=1A5` error), leading to memory allocation failures.
+4.  **Python Decompression Attempt**: We wrote a Python script to locate the `78 9C` signature and apply `zlib.decompress()`. 
+    *   *Result*: The decompression successfully outputted a massive stream of binary data containing plaintext UE3 class names (e.g., `ParticleSystem`, `HT_FX_pikaqiu`).
+    *   *Limitation*: The script failed to extract the entire file because the Zlib block abruptly ended where the next `86 C7 E4 47` block began, resulting in partial data loss or `zlib.error` exceptions.
+
+**Conclusion**: 
+The game employs a custom **multi-chunk encapsulation** strategy. It strips the standard UE3 "Summary" header, compresses the remaining data with Zlib, and concatenates multiple independent blocks together under a single `.png` file. To fully extract the assets, a custom parser is required to iterate through each `86 C7 E4 47` marker and decompress the corresponding Zlib block independently.
+
+<div align="center">
+  <img src="images/decoded.png" alt="Zlib Header in Hex" width="100%" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <br>
+  <em>Figure 5: Locating the "78 9C" Zlib header and the secondary custom magic number within the binary stream.</em>
 </div>
