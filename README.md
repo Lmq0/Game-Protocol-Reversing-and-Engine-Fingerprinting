@@ -69,7 +69,7 @@ This is a journey of peeling back the layers of obfuscation to see the raw, unad
   <em>Figure 1: Inspecting the GameApp class in JADX. Note the native library loading and obfuscated code.</em>
 </div>
 
-##Key Findings from the screenshot:
+## Key Findings from the screenshot:
 1.  **Native Engine Entry Point**: In the `com.jbgames.HOGame.GameApp` class, we found the critical line: `System.loadLibrary("HOGame");`. This proves that the Java layer is merely a wrapper for the Android lifecycle (handling music/video state), and all core logic, networking, and game loops are executed by the 41MB C++ native library (`libHOGame.so`).
 2.  **Obfuscation Detected**: The class names and variables are heavily obfuscated (e.g., `com.jbgames.HOGame.a`, `cVar`, `f1`), indicating that the developers actively tried to hinder static analysis.
 
@@ -79,7 +79,7 @@ This is a journey of peeling back the layers of obfuscation to see the raw, unad
   <em>Figure 3: Global search for "http" in JADX reveals only third-party analytics SDKs (Adjust), confirming that the game's core network protocol and backend APIs are completely absent from the Java layer.</em>
 </div>
 
-##Key Findings from the screenshot:
+## Key Findings from the screenshot:
 1.  **Missing Core Logic**: A global search for `http`, `api`, or Socket keywords returned only third-party SDKs (like Adjust), confirming that the actual network communication is completely hidden inside the native C++ layer, the libHOGame.so in folder lib.
 
 ### Step 3: Reverse Engineering the `.so` File (Engine Fingerprinting)
