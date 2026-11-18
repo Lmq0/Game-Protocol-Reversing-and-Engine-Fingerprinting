@@ -149,7 +149,7 @@ By comparing the standard structure with our captured data, we found that the ga
 By scanning the entire directory, we confirmed that the vast majority of the asset files share this custom header. This explained why standard unpacking tools (like UModel) failed, as they were looking for a standard UE3 ID card that the developers had deliberately destroyed.
 
 <div align="center">
-  <img src="image/hxd_magic_number.png" alt="Custom Magic Number" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <img src="image/custom_magic_number.png" alt="Custom Magic Number" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <br>
   <em>Figure 4: HxD showing the custom magic number "86 C7 E4 47" at the beginning of the asset files.</em>
 </div>
@@ -174,7 +174,7 @@ Once we discovered the custom magic number (`86 C7 E4 47`), our next challenge w
 The game employs a custom **multi-chunk encapsulation** strategy. It strips the standard UE3 "Summary" header, compresses the remaining data with Zlib, and concatenates multiple independent blocks together under a single `.png` file. To fully extract the assets, a custom parser is required to iterate through each `86 C7 E4 47` marker and decompress the corresponding Zlib block independently.
 
 <div align="center">
-  <img src="images/decoded.png" alt="Zlib Header in Hex" width="100%" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <img src="image/decoded.png" alt="Zlib Header in Hex" width="100%" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <br>
   <em>Figure 5: Locating the "78 9C" Zlib header and the secondary custom magic number within the binary stream.</em>
 </div>
