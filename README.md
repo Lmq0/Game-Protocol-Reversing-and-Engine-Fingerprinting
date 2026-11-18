@@ -104,6 +104,11 @@ This is a journey of peeling back the layers of obfuscation to see the raw, unad
 
 
 ### Step 4: Asset File Header Analysis (Capturing the Magic Number)
+
+**From Engine to Assets: The Transition**
+Now that we have confirmed the core engine is a customized version of UE3 and that it embeds Lua and Socket logic within `libHOGame.so`, the next logical step is to investigate how the engine interacts with its visual and data assets. If the engine handles all the heavy lifting, how are the actual game resources (models, textures, configurations) stored and packaged? 
+
+To answer this, we shift our focus from native binary analysis to the `assets` directory. Since standard UE3 tools rely on specific file headers, our first task is to inspect how the game packages these assets and whether it uses standard structures or its own obfuscation techniques.
 *   **Tools Used**: HxD / Python Scripts
 *   **Action**: Opened several `.ast.png` and `.fst.png` files in the `DataAndroid` directory and inspected the first 4 bytes of their headers.
 *   **Purpose & Finding**: We discovered that all files consistently start with `86 C7 E4 47`. This is **NOT** the standard UE3 magic number (which should be `C1 83 2A 9E`). This is a custom "fake magic number" applied by the game developers. By scanning the directory, we confirmed that the vast majority of the asset files share this custom header to bypass standard unpacking tools.
