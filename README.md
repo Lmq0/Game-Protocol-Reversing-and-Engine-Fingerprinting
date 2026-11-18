@@ -64,7 +64,7 @@ This is a journey of peeling back the layers of obfuscation to see the raw, unad
 *   **Purpose & Finding**: To examine the game's entry point and loading logic. Inside the `com.jbgames.HOGame` package, we found the `GameApp` class, which contains a critical line of code: `System.loadLibrary("HOGame");`. This proves that the game loads the 41MB C++ native library upon startup. Furthermore, we noticed that core network requests and gameplay logic are entirely absent in the Java layer, indicating that they are all handled deep within the C++ code.
 
 <div align="center">
-  <img src="images/jadx_decompile.png" alt="JADX Decompilation" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <img src="image/jadx_decompile.png" alt="JADX Decompilation" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <br>
   <em>Figure 2: JADX-GUI showing the System.loadLibrary call in GameApp.</em>
 </div>
@@ -78,7 +78,7 @@ This is a journey of peeling back the layers of obfuscation to see the raw, unad
     *   Therefore, we confirmed that this game is developed based on a heavily customized version of the UE3 engine.
 
 <div align="center">
-  <img src="images/hxd_engine_fingerprint.png" alt="HxD Engine Fingerprint" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <img src="image/hxd_engine_fingerprint.png" alt="HxD Engine Fingerprint" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <br>
   <em>Figure 3: HxD search results showing UE3 class names and Lua APIs inside libHOGame.so.</em>
 </div>
@@ -89,7 +89,7 @@ This is a journey of peeling back the layers of obfuscation to see the raw, unad
 *   **Purpose & Finding**: We discovered that all files consistently start with `86 C7 E4 47`. This is **NOT** the standard UE3 magic number (which should be `C1 83 2A 9E`). This is a custom "fake magic number" applied by the game developers. By scanning the directory, we confirmed that the vast majority of the asset files share this custom header to bypass standard unpacking tools.
 
 <div align="center">
-  <img src="images/hxd_magic_number.png" alt="Custom Magic Number" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <img src="image/hxd_magic_number.png" alt="Custom Magic Number" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <br>
   <em>Figure 4: HxD showing the custom magic number "86 C7 E4 47" at the beginning of the asset files.</em>
 </div>
