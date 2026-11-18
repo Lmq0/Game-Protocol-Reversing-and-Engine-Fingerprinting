@@ -106,6 +106,7 @@ This is a journey of peeling back the layers of obfuscation to see the raw, unad
 ### Step 4: Asset File Header Analysis (Capturing the Magic Number)
 
 **From Engine to Assets: The Transition**
+
 Now that we have confirmed the core engine is a customized version of UE3 and that it embeds Lua and Socket logic within `libHOGame.so`, the next logical step is to investigate how the engine interacts with its visual and data assets. If the engine handles all the heavy lifting, how are the actual game resources (models, textures, configurations) stored and packaged? 
 
 To answer this, we shift our focus from native binary analysis to the `assets` directory. Since standard UE3 tools rely on specific file headers, our first task is to inspect how the game packages these assets and whether it uses standard structures or its own obfuscation techniques.
