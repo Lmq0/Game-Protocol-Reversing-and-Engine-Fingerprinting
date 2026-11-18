@@ -22,11 +22,41 @@ This is a journey of peeling back the layers of obfuscation to see the raw, unad
 *   **Action**: Treated the game `.apk` file as a standard `.zip` archive and extracted it.
 *   **Purpose & Finding**: To quickly investigate the asset structure. We discovered that inside the `lib` directory, there is only one massive 41MB dynamic library: `libHOGame.so`. Furthermore, in the `assets` directory, we found a large number of files with numeric names (e.g., `1527585152.ast.png`) and a folder named `DataAndroid`. This initially indicated that the game assets are heavily packaged or obfuscated.
 
-<div align="center">
-  <img src="images/apk_extract.png" alt="APK Extraction Structure" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-  <br>
-  <em>Figure 1: Extracted APK directory structure showing libHOGame.so and assets.</em>
-</div>
+```
+📦 game_apk_extracted/
+├── 📁 assets/
+│   ├── 📁 Audio/                  # Game background music and sound effects (音效)
+│   ├── 📁 DataAndroid/            # 🎯 Core target: Custom UE3 asset chunks (核心资产包)
+│   │   ├── 📄 884290.ast.png      # Renamed UE3 binary packages (伪装成图片的资源包)
+│   │   ├── 📄 997926831.ast.png   # Contains custom magic number (86 C7 E4 47)
+│   │   ├── 📄 1527585152.fst.png  # Fragmented data chunks (碎片数据块)
+│   │   └── ......
+│   ├── 📁 Music/                  # Music tracks (音乐)
+│   ├── 📄 54107989.mst.png        # Renamed Music file (伪装后的音乐文件)
+│   ├── 📄 813231027.mst.png       # Music file
+│   └── ......
+│
+├── 📁 lib/                        # Native Libraries (C++ 动态链接库)
+│   └── 📁 arm64-v8a/
+│       └── ⚙️ libHOGame.so        # 🎯 41MB Custom UE3 Engine (自研/魔改的虚幻3引擎核心)
+│                                  # Contains: Lua VM, UE3 classes, Socket logic
+│
+├── 📁 kotlin/                     # Kotlin metadata (Kotlin 元数据目录)
+│
+├── 📁 META-INF/                   # APK signature and manifest (签名验证信息)
+│
+├── 📁 res/                        # Standard Android resources (安卓标准资源)
+│
+├── 📄 AndroidManifest.xml         # App permissions and components (安卓应用清单)
+├── 📄 billing.properties          # Google Play in-app billing config (谷歌内购配置)
+├── 📄 classes.dex                 # 7.9MB Java/Kotlin bytecode (Java 层可执行代码)
+│
+├── 📄 firebase-encoders.properties# 
+├── 📄 play-services-*.properties  # Third-party Google SDK configs (谷歌服务SDK配置)
+├── 📄 transport-api.properties    # 
+├── 📄 resources.arsc              # Compiled Android resource mapping (编译后的资源映射表)
+└── 📄 DebugProbesKt.bin           # Debug tools metadata
+```
 
 ### Step 2: Analyzing `classes.dex` (Java Layer Logic)
 *   **Tools Used**: JADX-GUI (Open-source decompiler)
