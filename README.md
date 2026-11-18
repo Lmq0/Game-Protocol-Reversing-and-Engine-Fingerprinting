@@ -64,9 +64,9 @@ This is a journey of peeling back the layers of obfuscation to see the raw, unad
 *   **Purpose & Finding**: To examine the game's entry point and loading logic. Inside the `com.jbgames.HOGame` package, we found the `GameApp` class, which contains a critical line of code: `System.loadLibrary("HOGame");`. This proves that the game loads the 41MB C++ native library upon startup. Furthermore, we noticed that core network requests and gameplay logic are entirely absent in the Java layer, indicating that they are all handled deep within the C++ code.
 
 <div align="center">
-  <img src="image/jadx_decompile.png" alt="JADX Decompilation" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <img src="images/jadx_decompile.png" alt="JADX Decompilation" width="100%" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
   <br>
-  <em>Figure 2: JADX-GUI showing the System.loadLibrary call in GameApp.</em>
+  <em>Figure 2: Inspecting the GameApp class in JADX. Note the native library loading and obfuscated code.</em>
 </div>
 
 ### Step 3: Reverse Engineering the `.so` File (Engine Fingerprinting)
